@@ -100,19 +100,12 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Registering...';
 
-      if (typeof tg.sendData !== 'function') {
-        errorMsg.textContent = 'Telegram API not available. Close and try again.';
-        errorMsg.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Register';
-        return;
-      }
-
-      tg.sendData(JSON.stringify({ type: selectedType, name: name }));
-
-      setTimeout(function() {
-        try { tg.close(); } catch(e) {}
-      }, 2000);
+      var safeName = name.replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
+      var shortName = safeName.substring(0, 40);
+      var finalName = shortName.replace(/ /g, '_');
+      var typeCode = selectedType === 'company' ? 'c' : 'i';
+      var link = 'https://t.me/EchoMind0bot?start=reg_' + typeCode + '_' + finalName;
+      tg.openTelegramLink(link);
     }
   </script>
 </body>
