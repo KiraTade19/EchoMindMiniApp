@@ -62,30 +62,36 @@
   <button class="submit" id="submitBtn" onclick="submit()">Register</button>
 
   <script>
-    const tg = window.Telegram.WebApp;
+    var tg = window.Telegram.WebApp;
+    tg.ready();
     tg.expand();
-    tg.MainButton.hide();
 
-    let selectedType = 'company';
-    const nameInput = document.getElementById('nameInput');
-    const errorMsg = document.getElementById('errorMsg');
-    const submitBtn = document.getElementById('submitBtn');
+    var selectedType = 'company';
+    var nameInput = document.getElementById('nameInput');
+    var errorMsg = document.getElementById('errorMsg');
+    var submitBtn = document.getElementById('submitBtn');
 
     function selectType(type) {
       selectedType = type;
-      document.querySelectorAll('.toggle').forEach(el => {
-        el.classList.toggle('active', el.dataset.type === type);
-      });
+      var toggles = document.querySelectorAll('.toggle');
+      for (var i = 0; i < toggles.length; i++) {
+        var el = toggles[i];
+        if (el.dataset.type === type) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      }
       nameInput.placeholder = type === 'company' ? 'Company name' : 'Your name';
       nameInput.focus();
     }
 
-    nameInput.addEventListener('keydown', (e) => {
+    nameInput.addEventListener('keydown', function(e) {
       if (e.key === 'Enter') submit();
     });
 
     function submit() {
-      const name = nameInput.value.trim();
+      var name = nameInput.value.trim();
       if (!name) {
         errorMsg.style.display = 'block';
         return;
@@ -93,7 +99,20 @@
       errorMsg.style.display = 'none';
       submitBtn.disabled = true;
       submitBtn.textContent = 'Registering...';
+
+      if (typeof tg.sendData !== 'function') {
+        errorMsg.textContent = 'Telegram API not available. Close and try again.';
+        errorMsg.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Register';
+        return;
+      }
+
       tg.sendData(JSON.stringify({ type: selectedType, name: name }));
+
+      setTimeout(function() {
+        try { tg.close(); } catch(e) {}
+      }, 2000);
     }
   </script>
 </body>
